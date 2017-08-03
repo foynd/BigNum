@@ -14,7 +14,8 @@ struct node
 class BigNumber 
 {
 private:
-    node *head;     //head of a linked list of digits
+    node *head;         //head of a linked list of digits
+    bool isNegative;    //sign bit
 
 public:
 
@@ -25,6 +26,7 @@ public:
     {
         head = NULL;
         insertAtHead(0);
+        isNegative = 0;
     }
 
     //deprecated method... prints the linked list from head to the end
@@ -113,34 +115,75 @@ public:
     //operator overloading for incrementing with the ++ operator.
     void operator -- ()
     {
-        //first:  add the digits
-        head->data--;
-        node *cur = head;
-        //while the current digit has a carry from the addition, keep going
-        if (cur == NULL)
+        if (!isNegative)
         {
-            cout << "Something is broked, our number no longer exists";
-        }
-        else
-        {
-            //by the previous if statement, we guarantee that cur != NULL if we get here, so we can use cur->data
-            while (cur->data < 0)
+            //first:  add the digits
+            head->data--;
+            node *cur = head;
+            //while the current digit has a carry from the addition, keep going
+            if (cur == NULL)
             {
-                if (cur->next != NULL)
+                cout << "Something is broked, our number no longer exists";
+            }
+            else
+            {
+                //by the previous if statement, we guarantee that cur != NULL if we get here, so we can use cur->data
+                while (cur->data < 0)
                 {
-                    cur->data = 9;
-                    cur->next->data--;
-                    if (cur->next->data == 0)
+                    if (cur->next != NULL)
                     {
-                        //remove last node
-                        //TODO: probably could make this more efficient by writing deletion code right here
-                        deleteAtTail();
+                        cur->data = 9;
+                        cur->next->data--;
+                        if (cur->next->data == 0)
+                        {
+                            //remove last node
+                            //TODO: probably could make this more efficient by writing deletion code right here
+                            deleteAtTail();
+                            cout <<"we deleted last node\n";
+                        }
+                        else
+                        {
+                            cur = cur->next;
+                        }
                     }
                     else
                     {
-                        cur = cur->next;
+                        //cur->next is null, but cur->data is good
+                        if (cur->next == head->next)
+                        {
+                            //cout << "this should trigger during a zero crossover\n";
+                            isNegative = !isNegative;
+                            head->data+=2;  //one to balance out the negative, one to actually flip the side, so +=2
+                        }
                     }
+                        //cout << "no more infinity";
                 }
+            }
+        }
+        else
+        {
+            //the number is negative, so leave sign bit alone and pretend we're adding but with no negative testing
+            head->data++;
+            node *cur = head;
+            //while the current digit has a carry from the addition, keep going
+            while (cur->data > 9)
+            {
+                cur->data = 0;
+                //make sure the node we're carrying to exists
+                if(cur->next != NULL)
+                {
+                    cur->next->data++;
+                }
+                else
+                {
+                    //create new node with 1 in it for the next place value
+                    node* temp = new node;
+                    temp->data = 1;
+                    temp->next = NULL;
+                    temp->prev = cur;
+                    cur->next = temp;
+                }
+                cur = cur->next;
             }
         }
     }
@@ -161,27 +204,76 @@ public:
     void operator ++ ()
     {
         //first:  add the digits
-        head->data++;
-        node *cur = head;
-        //while the current digit has a carry from the addition, keep going
-        while (cur->data > 9)
+        if (!isNegative)
         {
-            cur->data = 0;
-            //make sure the node we're carrying to exists
-            if(cur->next != NULL)
+            head->data++;
+            node *cur = head;
+            //while the current digit has a carry from the addition, keep going
+            while (cur->data > 9)
             {
-                cur->next->data++;
+                cur->data = 0;
+                //make sure the node we're carrying to exists
+                if(cur->next != NULL)
+                {
+                    cur->next->data++;
+                }
+                else
+                {
+                    //create new node with 1 in it for the next place value
+                    node* temp = new node;
+                    temp->data = 1;
+                    temp->next = NULL;
+                    temp->prev = cur;
+                    cur->next = temp;
+                }
+                cur = cur->next;
+            }
+        }
+        else
+        {
+            //number is negative, so we really need to "subtract"
+            head->data--;
+            node *cur = head;
+            //while the current digit has a carry from the addition, keep going
+            if (cur == NULL)
+            {
+                cout << "Something is broked, our number no longer exists";
             }
             else
             {
-                //create new node with 1 in it for the next place value
-                node* temp = new node;
-                temp->data = 1;
-                temp->next = NULL;
-                temp->prev = cur;
-                cur->next = temp;
+                //by the previous if statement, we guarantee that cur != NULL if we get here, so we can use cur->data
+                while (cur->data < 0)
+                {
+                    if (cur->next != NULL)
+                    {
+                        cur->data = 9;
+                        cur->next->data--;
+                        if (cur->next->data == 0)
+                        {
+                            //remove last node
+                            //TODO: probably could make this more efficient by writing deletion code right here
+                            deleteAtTail();
+                            cout <<"we deleted last node\n";
+                        }
+                        else
+                        {
+                            cur = cur->next;
+                        }
+                    }
+                    else
+                    {
+                        //cur->next is null, but cur->data is good
+                        if (cur->next == head->next)
+                        {
+                            //cout << "this should trigger during a zero crossover\n";
+                            isNegative = !isNegative;
+                            head->data+=2;  //one to balance out the negative, one to actually flip the side, so +=2
+                            //cout << "isNeg is: " << isNegative << '\n';
+                        }
+                    }
+                        //cout << "no more infinity";
+                }
             }
-            cur = cur->next;
         }
     }
 
@@ -189,6 +281,10 @@ public:
     //does not work without the keyword "friend"... how nice.
     friend ostream& operator<< (ostream& os, const BigNumber &head)
     {
+        if (head.isNegative)
+        {
+            os << '-';
+        }
         node *cur = head.head;
         if (cur == NULL)
         {
@@ -223,19 +319,27 @@ int main()
     BigNumber num1 = BigNumber();       //this initializes the number to zero
 
     
-    num1 = num1 + 101;
+    num1 = num1 + 0;    //offset is what the number starts at
     cout << "num1 is: " << num1;
 
     // BigNumber num2 = num1 + 5;
     // cout << "num2 is: " << num2;
 
     --num1;
-    cout << "num1 is now: " << num1;
+    cout << "--num1 is now: " << num1;
     --num1;
-    cout << "num1 is now: " << num1;
+    cout << "--num1 is now: " << num1;
     --num1;
-    cout << "num1 is now: " << num1;
-
+    cout << "--num1 is now: " << num1;
+    ++num1;
+    cout << "++num1 is now: " << num1;
+    ++num1;
+    cout << "++num1 is now: " << num1;
+    ++num1;
+    cout << "++num1 is now: " << num1;
+    ++num1;
+    cout << "++num1 is now: " << num1;
+    
 
     return 0;
 }
@@ -244,7 +348,7 @@ CURRENTLY SUPPORTED MATHEMATICAL OPERATORS:
 ++ (increment by 1)
 + (int)
 << (used for cout)
--- (decrement by 1)     DON'T TRY TO GO NEGATIVE YET
+-- (decrement by 1)
 
 
 <deprecated> CURRENTLY SUPPORTED METHODS: <deprecated>
