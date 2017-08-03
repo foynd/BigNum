@@ -75,7 +75,75 @@ public:
             cur->next = temp;
         }
     }
+
+    void deleteAtTail()
+    {
+        //first check if firstNode is NULL or last node.
+        node* cur = head;
+        if(cur == NULL)
+        {
+            //do nothing, we can't delete nothing...
+            return;
+        }
+
+        if(cur->next == NULL)
+        {
+            //probably don't want to ever be here for now.  this means our number would no longer exist
+            delete cur;
+            cur = NULL;
+            return;
+        }
+        //ASSERTION: at this point, we can guarantee that cur->next exists, so no segfault for that
+
+        //since cur->next exists, we can test cur->next->next without screwing up
+        //traverse to the end of the linked list (or to the most significant digit)
+        while (cur->next && cur->next->next != NULL)
+        {
+            cur = cur->next;
+        }
+
+        //cur is the second last value, cur->next is the last value, we want to delete it
+        delete cur->next;
+        cur->next = NULL;
+    }
+
+
 //-----------------OPERATOR OVERLOADING BENEATH THIS PART-----------------
+
+    //operator overloading for incrementing with the ++ operator.
+    void operator -- ()
+    {
+        //first:  add the digits
+        head->data--;
+        node *cur = head;
+        //while the current digit has a carry from the addition, keep going
+        if (cur == NULL)
+        {
+            cout << "Something is broked, our number no longer exists";
+        }
+        else
+        {
+            //by the previous if statement, we guarantee that cur != NULL if we get here, so we can use cur->data
+            while (cur->data < 0)
+            {
+                if (cur->next != NULL)
+                {
+                    cur->data = 9;
+                    cur->next->data--;
+                    if (cur->next->data == 0)
+                    {
+                        //remove last node
+                        //TODO: probably could make this more efficient by writing deletion code right here
+                        deleteAtTail();
+                    }
+                    else
+                    {
+                        cur = cur->next;
+                    }
+                }
+            }
+        }
+    }
 
     //operator overloading for BigNum + (int)
     //TODO: Make this more efficient... yikes.
@@ -155,21 +223,28 @@ int main()
     BigNumber num1 = BigNumber();       //this initializes the number to zero
 
     
-    
-    ++num1;
-    cout << num1;
-    
-    ++num1;
+    num1 = num1 + 101;
     cout << "num1 is: " << num1;
 
-    BigNumber num2 = num1 + 5;
-    cout << "num2 is: " << num2;
+    // BigNumber num2 = num1 + 5;
+    // cout << "num2 is: " << num2;
+
+    --num1;
+    cout << "num1 is now: " << num1;
+    --num1;
+    cout << "num1 is now: " << num1;
+    --num1;
+    cout << "num1 is now: " << num1;
+
+
     return 0;
 }
 /*
 CURRENTLY SUPPORTED MATHEMATICAL OPERATORS:
 ++ (increment by 1)
++ (int)
 << (used for cout)
+-- (decrement by 1)     DON'T TRY TO GO NEGATIVE YET
 
 
 <deprecated> CURRENTLY SUPPORTED METHODS: <deprecated>
