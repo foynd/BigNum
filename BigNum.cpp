@@ -75,6 +75,19 @@ public:
             cur->next = temp;
         }
     }
+//-----------------OPERATOR OVERLOADING BENEATH THIS PART-----------------
+
+    //operator overloading for BigNum + (int)
+    //TODO: Make this more efficient... yikes.
+    BigNumber operator + (int numToAdd)
+    {
+        BigNumber temp = *this;
+        for (int i = 0; i < numToAdd; i++)
+        {
+            ++temp;
+        }
+        return temp;
+    }
 
     //operator overloading for incrementing with the ++ operator.
     void operator ++ ()
@@ -140,13 +153,17 @@ public:
 int main()
 {
     BigNumber num1 = BigNumber();       //this initializes the number to zero
+
+    
     
     ++num1;
     cout << num1;
     
     ++num1;
-    cout << "The new number is " << num1;
+    cout << "num1 is: " << num1;
 
+    BigNumber num2 = num1 + 5;
+    cout << "num2 is: " << num2;
     return 0;
 }
 /*
