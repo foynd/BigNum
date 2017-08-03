@@ -7,4 +7,6 @@ A class that will handle mathematical operations of massive numbers.
 
 ### Currently supported operations
 * incrementing by 1 (++)
+* adding an (int) to BigNum
+* decrementing by 1 (--)
 * cout
