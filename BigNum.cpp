@@ -26,7 +26,7 @@ public:
     {
         head = NULL;
         insertAtHead(0);
-        isNegative = 0;
+        isNegative = false;
     }
 
     //deprecated method... prints the linked list from head to the end
@@ -139,7 +139,6 @@ public:
                             //remove last node
                             //TODO: probably could make this more efficient by writing deletion code right here
                             deleteAtTail();
-                            cout <<"we deleted last node\n";
                         }
                         else
                         {
@@ -231,8 +230,15 @@ public:
         }
         else
         {
-            //number is negative, so we really need to "subtract"
+            //number is negative, so we really need to "subtract" from the digits
             head->data--;
+
+            if (head->next == NULL && head->data == 0)
+            {
+                //fixes negative zero bug
+                isNegative = false;
+            }
+            
             node *cur = head;
             //while the current digit has a carry from the addition, keep going
             if (cur == NULL)
@@ -244,6 +250,8 @@ public:
                 //by the previous if statement, we guarantee that cur != NULL if we get here, so we can use cur->data
                 while (cur->data < 0)
                 {
+
+                    
                     if (cur->next != NULL)
                     {
                         cur->data = 9;
@@ -253,20 +261,24 @@ public:
                             //remove last node
                             //TODO: probably could make this more efficient by writing deletion code right here
                             deleteAtTail();
-                            cout <<"we deleted last node\n";
                         }
                         else
                         {
                             cur = cur->next;
+                            
                         }
+                        
                     }
                     else
                     {
                         //cur->next is null, but cur->data is good
+                        
                         if (cur->next == head->next)
                         {
-                            //cout << "this should trigger during a zero crossover\n";
-                            isNegative = !isNegative;
+                            if (cur->data != 0)
+                            {
+                                isNegative = !isNegative;
+                            }
                             head->data+=2;  //one to balance out the negative, one to actually flip the side, so +=2
                             //cout << "isNeg is: " << isNegative << '\n';
                         }
@@ -307,7 +319,7 @@ public:
                 cur = cur->prev;
             }
             //cur is now back to head, and the last thing we print is cur->data (aka, the least significant digit)
-            os << cur->data << '\n';    //TODO: eventually get rid of this newline character when no longer debugging
+            os << cur->data;
         }
         return os;
     }
@@ -318,28 +330,27 @@ int main()
 {
     BigNumber num1 = BigNumber();       //this initializes the number to zero
 
-    
     num1 = num1 + 0;    //offset is what the number starts at
-    cout << "num1 is: " << num1;
+    cout << "num1 is: " << num1 << '\n';
 
-    // BigNumber num2 = num1 + 5;
-    // cout << "num2 is: " << num2;
 
-    --num1;
-    cout << "--num1 is now: " << num1;
-    --num1;
-    cout << "--num1 is now: " << num1;
-    --num1;
-    cout << "--num1 is now: " << num1;
-    ++num1;
-    cout << "++num1 is now: " << num1;
-    ++num1;
-    cout << "++num1 is now: " << num1;
-    ++num1;
-    cout << "++num1 is now: " << num1;
-    ++num1;
-    cout << "++num1 is now: " << num1;
-    
+    //for debugging, enter 1 to add 1, enter 2 to subtract 1, enter -1 to quit
+    int userNum = 0;
+    while (userNum != -1)
+    {
+        cin >> userNum;
+        if (userNum == 1)
+        {
+            cout << num1 << "++ is "; 
+            ++num1;
+        }
+        if (userNum == 2)
+        {
+            cout << num1 << "-- is "; 
+            --num1;
+        }
+        cout << num1 << '\n';
+    }
 
     return 0;
 }
