@@ -112,6 +112,32 @@ public:
 
 //-----------------OPERATOR OVERLOADING BENEATH THIS PART-----------------
 
+    //operator overloading for BigNum += (int)
+    //TODO: Make this more efficient... yikes.
+    void operator += (int numToAdd)
+    {
+        *this = *this + numToAdd;
+    }
+
+    //operator overloading for BigNum -= (int)
+    //TODO: Make this more efficient... yikes.
+    void operator -= (int numToSubtract)
+    {
+        *this = *this - numToSubtract;
+    }
+    
+    //operator overloading for BigNum - (int)
+    //TODO: Make this more efficient... yikes.
+    BigNumber operator - (int numToSubtract)
+    {
+        BigNumber temp = *this;
+        for (int i = 0; i < numToSubtract; i++)
+        {
+            --temp;
+        }
+        return temp;
+    }
+
     //operator overloading for incrementing with the ++ operator.
     void operator -- ()
     {
@@ -330,10 +356,14 @@ int main()
 {
     BigNumber num1 = BigNumber();       //this initializes the number to zero
 
-    num1 = num1 + 0;    //offset is what the number starts at
+    num1 = num1 - 3;    //offset is what the number starts at
     cout << "num1 is: " << num1 << '\n';
 
+    cout << num1 << " - 5 is: ";
+    num1 -= 5;
+    cout << num1;
 
+    /*
     //for debugging, enter 1 to add 1, enter 2 to subtract 1, enter -1 to quit
     int userNum = 0;
     while (userNum != -1)
@@ -351,6 +381,8 @@ int main()
         }
         cout << num1 << '\n';
     }
+    */
+
 
     return 0;
 }
